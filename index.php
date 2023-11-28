@@ -1,8 +1,8 @@
 <?php
+// Include the DB file
 include 'dbc.php';
 // Initialize the shopping list as an empty array
 $shoppingList = [];
-// echo "Index to delete";
 
 // Check if the form is submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -38,14 +38,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Update item status in the shopping list (mark as done)
     if (isset($_POST['toggleDone'])) {
+        // echo "test";
         $index = $_POST['toggleDone'];
+        
         // Toggle item status in the database
         $stmt = $conn->prepare("UPDATE shopping_list SET done = NOT done WHERE id = ?");
         $stmt->bind_param("i", $index);
         $stmt->execute();
         $stmt->close();
 
-        // Redirect to prevent form resubmission
+        //Redirect to prevent form resubmission
         header("Location: {$_SERVER['PHP_SELF']}");
         exit();
     }
@@ -83,6 +85,10 @@ if ($result->num_rows > 0) {
 <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shopping List</title>
+    <link rel="stylesheet" href="./Assets/main.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 </head>
 
 <body class="body_wrapper">
@@ -95,11 +101,9 @@ if ($result->num_rows > 0) {
     </form>
     <ul>
         <?php foreach ($shoppingList as $item): ?>
-        <li class="<?php echo $item['done'] ? 'done' : ''; ?>">
-            <form method="post" action="">
-                <input type="checkbox" name="toggleDone" value="<?php echo $item['id']; ?>" onchange="this.form.submit()"
-                    <?php echo $item['done'] ? 'checked' : ''; ?>>
-
+        <li class="<?php echo $item['done'] ? 'done' : ''; ?> shopping_item">
+            <form method="post" action="" id="toggleForm">                        
+                <input type="checkbox" name="toggleDone" value="<?php echo $item['id']; ?>" <?php echo $item['done'] ? 'checked' : ''; ?>>
                 <?php if (!isset($_POST['editItem']) || $_POST['editItem'] != $item['id']): ?>
                     <span><?php echo htmlspecialchars($item['item']); ?></span>
                     <button type="submit" name="editItem" value="<?php echo $item['id']; ?>">Edit</button>
@@ -109,25 +113,35 @@ if ($result->num_rows > 0) {
                 <?php endif; ?>
 
                 <button type="submit" name="deleteItem" value="<?php echo $item['id']; ?>">Delete</button>
-            </form>
+            </form>     
         </li>
-        <?php endforeach; ?>
+        <?php endforeach; ?>         
     </ul>
 </main>
 
 <script>
-        function toggleDone(id) {
-            // Simulate form submission for toggling item status
-            var form = document.createElement('form');
-            form.method = 'post';
-            form.action = '';
-            var input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'toggleDone';
-            input.value = id;
-            form.appendChild(input);
-            document.body.appendChild(form);
-            form.submit();
-        }
-    </script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var checkboxes = document.querySelectorAll('input[name="toggleDone"]');
+        
+        checkboxes.forEach(function(checkbox) {
+            checkbox.addEventListener('change', function() {
+                toggleDone(this.value);
+                
+            });
+        });
+    });
+
+    function toggleDone(id) {
+        var form = document.getElementById('toggleForm');
+        var input = document.createElement('input');
+
+        input.type = 'hidden';
+        input.name = 'toggleDone';
+        input.value = id;
+
+        form.appendChild(input);
+        form.submit();
+    }
+</script>
+
 </body>

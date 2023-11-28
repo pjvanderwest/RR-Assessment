@@ -1,7 +1,16 @@
-body_wrapper{
+.body_wrapper{
     margin: 0;
-    .main{
+    font-family: 'Lato', sans-serif;
+    font-family: 'Roboto', sans-serif;
+    main{
+        border: 1px solid #000;
+        width:50vw;
+        margin: auto;
+        padding:0 2rem;
 
+        .done{
+            text-decoration: line-through;
+        }
     }
 
 }
